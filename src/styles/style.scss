@@ -1,0 +1,32 @@
+*,
+*::after,
+*::before {
+  box-sizing: border-box;
+}
+
+.row {
+  display: flex;
+}
+.grid-el {
+  margin: 0.25rem;
+  text-align: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: 2px solid hotpink;
+  &:hover {
+    background: gray;
+  }
+}
+
+.cell-selected {
+  background: pink;
+}
+
+.red {
+  background: red;
+}
+
+.blue {
+  background: blue;
+}

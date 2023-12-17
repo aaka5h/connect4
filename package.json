@@ -1,0 +1,30 @@
+{
+  "name": "connect4-snabbdom",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch:build": "npm run build -- --watch",
+    "format": "prettier . --write",
+    "test": "test",
+    "start": "serve ."
+  },
+  "keywords": [
+    "connect-4",
+    "snabbdom"
+  ],
+  "author": "aaka5h",
+  "license": "ISC",
+  "dependencies": {
+    "snabbdom": "^3.5.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.19.9",
+    "prettier": "3.1.1",
+    "serve": "^14.2.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
