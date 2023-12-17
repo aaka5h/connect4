@@ -49,12 +49,12 @@ class Board {
   }
 
   getWidth() {
-    return colSize - 1;
+    return colSize;
   }
 
 
   getHeight() {
-    return rowSize - 1;
+    return rowSize;
   }
 
   switchCurrentPlayer = () => {
@@ -67,23 +67,20 @@ class Board {
 
   getCell(row, col) {
     if (row < 0 || col < 0) throw new Error('invalid index');
-    if (row > this.getHeight() || col > this.getWidth()) throw new Error('invalid index');
+    if (row > this.getHeight()-1 || col > this.getWidth()-1) throw new Error('invalid index');
     return this.matrix[row][col];
   }
 
   getSelectedCell(clickedCell) {
     let [clickedRow,col] = clickedCell.coordinates;
     let row = 0;
-    while (row <= this.getHeight()) {
-      console.log('--', row, col);
+    while (row <= this.getHeight() - 1) {
       if (this.getCell(row, col).selectedBy) {
-        console.log('--#', row, col);
         if (row === 0) return this.getCell(row, col);
         return this.getCell(row-1, col);
       }
       row++;
     }
-    console.log('-->', row, col, '--');
     return this.getCell(row-1, col);
   }
 }
@@ -173,9 +170,9 @@ function drawGrid(board) {
                 if (!!targetCell.selectedBy) return;
                 targetCell.selectCell(board.currentPlayer);
                 const hasPlayerWon = areFourConnected(board.currentPlayer, board);
-                board.switchCurrentPlayer();
                 hasPlayerWon && board.gameOver();
-                patch(gameStatusNode, h('div', `Won by ${hasPlayerWon ? board.currentPlayer : 'None'}`))
+                patch(gameStatusNode, h('div', `Won by ${hasPlayerWon ? board.currentPlayer : 'None'}`));
+                board.switchCurrentPlayer();
                 redrawBoard(board);
 
               },
