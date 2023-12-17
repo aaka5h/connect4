@@ -21,67 +21,88 @@ const patch = init([
 const rowSize = 6;
 const colSize = 7;
 
+function createMatrix(row, col) {
+  const matrix = [];
+
+  for (let i = 0; i < row; i++) {
+    const row = [];
+    for (let j = 0; j < col; j++) {
+      row.push(new Cell({index: `${i}-${j}`, selectedBy: null}));
+    }
+    matrix.push(row);
+  }
+  return matrix;
+}
+
 class Board {
   currentPlayer = 'red';
+  matrix = [];
+
   constructor(row, col, initPlayer) {
     this.currentPlayer = initPlayer;
+    this.matrix = createMatrix(row, col);
+  }
+
+
+  getWidth() {
+    return colSize - 1;
+  }
+
+
+  getHeight() {
+    return rowSize - 1;
+  }
+
+  switchCurrentPlayer = () => {
+    if (this.currentPlayer === 'red') {
+      this.currentPlayer = 'blue';
+    } else {
+      this.currentPlayer = 'red';
+    }
   }
 }
 
 class Cell {
-  constructor() {
+  constructor({index, selectedBy}) {
+    this.index = index;
+    this.selectedBy = selectedBy;
+  }
+
+  selectCell(currentPlayer) {
+    this.selectedBy = currentPlayer;
   }
 }
 
-let currentPlayer = "red";
-const switchCurrentPlayer = () => {
-  if (currentPlayer === 'red') {
-    currentPlayer = 'blue';
-  } else {
-    currentPlayer = 'red';
-  }
-}
 
-function selectCell(cell) {
-  cell.selectedBy = currentPlayer;
-}
-
-function getWidth() {
-  return colSize - 1;
-}
-
-
-function getHeight() {
-  return rowSize - 1;
-}
 function areFourConnected(player, board) {
+  const boardMatrix = board.matrix;
   // horizontalCheck 
-  for (let j = 0; j<getHeight()-3 ; j++ ){
-    for (let i = 0; i<getWidth(); i++){
-      if (board[i][j].selectedBy === player && board[i][j+1].selectedBy === player && board[i][j+2].selectedBy === player && board[i][j+3].selectedBy === player){
+  for (let j = 0; j < board.getHeight() - 3; j++) {
+    for (let i = 0; i < board.getWidth(); i++) {
+      if (boardMatrix[i][j].selectedBy === player && boardMatrix[i][j + 1].selectedBy === player && boardMatrix[i][j + 2].selectedBy === player && boardMatrix[i][j + 3].selectedBy === player) {
         return true;
       }
     }
   }
   // verticalCheck
-  for (let i = 0; i<getWidth()-3 ; i++ ){
-    for (let j = 0; j<getHeight(); j++){
-      if (board[i][j].selectedBy === player && board[i+1][j].selectedBy === player && board[i+2][j].selectedBy === player && board[i+3][j].selectedBy === player){
+  for (let i = 0; i < board.getWidth() - 3; i++) {
+    for (let j = 0; j < board.getHeight(); j++) {
+      if (boardMatrix[i][j].selectedBy === player && boardMatrix[i + 1][j].selectedBy === player && boardMatrix[i + 2][j].selectedBy === player && boardMatrix[i + 3][j].selectedBy === player) {
         return true;
       }
     }
   }
   // ascendingDiagonalCheck 
-  for (let i=3; i<getWidth(); i++){
-    for (let j=0; j<getHeight()-3; j++){
-      if (board[i][j].selectedBy === player && board[i-1][j+1].selectedBy === player && board[i-2][j+2].selectedBy === player && board[i-3][j+3].selectedBy=== player)
+  for (let i = 3; i < board.getWidth(); i++) {
+    for (let j = 0; j < board.getHeight() - 3; j++) {
+      if (boardMatrix[i][j].selectedBy === player && boardMatrix[i - 1][j + 1].selectedBy === player && boardMatrix[i - 2][j + 2].selectedBy === player && boardMatrix[i - 3][j + 3].selectedBy === player)
         return true;
     }
   }
   // descendingDiagonalCheck
-  for (let i=3; i<getWidth(); i++){
-    for (let j=3; j<getHeight(); j++){
-      if (board[i][j].selectedBy === player && board[i-1][j-1].selectedBy === player && board[i-2][j-2].selectedBy === player && board[i-3][j-3].selectedBy === player)
+  for (let i = 3; i < board.getWidth(); i++) {
+    for (let j = 3; j < board.getHeight(); j++) {
+      if (boardMatrix[i][j].selectedBy === player && boardMatrix[i - 1][j - 1].selectedBy === player && boardMatrix[i - 2][j - 2].selectedBy === player && boardMatrix[i - 3][j - 3].selectedBy === player)
         return true;
     }
   }
@@ -90,25 +111,17 @@ function areFourConnected(player, board) {
 
 
 function generateMatrix(row, col) {
-  const matrix = [];
+  return new Board(row, col, 'red');
 
-  for (let i = 0; i < row; i++) {
-    const row = [];
-    for (let j = 0; j < col; j++) {
-      row.push({index: `${i}-${j}`, selected: false, selectedBy: null});
-    }
-    matrix.push(row);
-  }
-  return matrix;
 }
 
 
-const redrawBoard = (matrix) => {
-  console.log(matrix);
-  vnode = patch(vnode, drawGrid(matrix));
+const redrawBoard = (board) => {
+  vnode = patch(vnode, drawGrid(board));
 };
 
-function drawGrid(matrix) {
+function drawGrid(board) {
+  const matrix = board.matrix;
   const renderedMatrix = [];
   for (let i = 0; i < matrix.length; i++) {
     const cols = matrix[i];
@@ -128,12 +141,12 @@ function drawGrid(matrix) {
               click: () => {
                 console.log('el clicked');
                 if (!!cell.selectedBy) return;
-                  console.log('selecting el');
-                  selectCell(cell);
-                  const hasPlayerWon = areFourConnected(currentPlayer, matrix);
-                  patch(gameStatusNode, h('div', `Won by ${hasPlayerWon? currentPlayer: 'None'}`))
-                  switchCurrentPlayer();
-                redrawBoard(matrix);
+                console.log('selecting el');
+                cell.selectCell(board.currentPlayer);
+                const hasPlayerWon = areFourConnected(board.currentPlayer, board);
+                patch(gameStatusNode, h('div', `Won by ${hasPlayerWon ? board.currentPlayer : 'None'}`))
+                board.switchCurrentPlayer();
+                redrawBoard(board);
 
               },
             },
