@@ -7,6 +7,10 @@
 .row {
   display: flex;
 }
+.grid-container {
+  padding: 1rem;
+  background: #416cea;
+}
 .grid-el {
   margin: 0.25rem;
   text-align: center;
@@ -14,6 +18,11 @@
   height: 3rem;
   border-radius: 50%;
   border: 2px solid hotpink;
+  &_inset {
+    width: 2.8rem;
+    height: 2.8rem;
+    border: 1px solid black;
+  }
   &:hover {
     background: gray;
   }
@@ -24,9 +33,9 @@
 }
 
 .red {
-  background: red;
+  background: #ff4747;
 }
 
-.blue {
-  background: blue;
+.yellow {
+  background: #fff04e;
 }
