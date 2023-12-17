@@ -41,8 +41,12 @@ class Board {
   constructor(row, col, initPlayer) {
     this.currentPlayer = initPlayer;
     this.matrix = createMatrix(row, col);
+    this.isGameOver = false;
   }
 
+  gameOver(){
+    this.isGameOver = true;
+  }
 
   getWidth() {
     return colSize - 1;
@@ -60,6 +64,28 @@ class Board {
       this.currentPlayer = 'red';
     }
   }
+
+  getCell(row, col) {
+    if (row < 0 || col < 0) throw new Error('invalid index');
+    if (row > this.getHeight() || col > this.getWidth()) throw new Error('invalid index');
+    return this.matrix[row][col];
+  }
+
+  getSelectedCell(clickedCell) {
+    let [clickedRow,col] = clickedCell.coordinates;
+    let row = 0;
+    while (row <= this.getHeight()) {
+      console.log('--', row, col);
+      if (this.getCell(row, col).selectedBy) {
+        console.log('--#', row, col);
+        if (row === 0) return this.getCell(row, col);
+        return this.getCell(row-1, col);
+      }
+      row++;
+    }
+    console.log('-->', row, col, '--');
+    return this.getCell(row-1, col);
+  }
 }
 
 class Cell {
@@ -68,6 +94,9 @@ class Cell {
     this.selectedBy = selectedBy;
   }
 
+  get coordinates() {
+    return this.index.split('-');
+  }
   selectCell(currentPlayer) {
     this.selectedBy = currentPlayer;
   }
@@ -77,31 +106,31 @@ class Cell {
 function areFourConnected(player, board) {
   const boardMatrix = board.matrix;
   // horizontalCheck 
-  for (let j = 0; j < board.getHeight() - 3; j++) {
-    for (let i = 0; i < board.getWidth(); i++) {
+  for (let j = 0; j < board.getWidth() - 3; j++) {
+    for (let i = 0; i < board.getHeight(); i++) {
       if (boardMatrix[i][j].selectedBy === player && boardMatrix[i][j + 1].selectedBy === player && boardMatrix[i][j + 2].selectedBy === player && boardMatrix[i][j + 3].selectedBy === player) {
         return true;
       }
     }
   }
   // verticalCheck
-  for (let i = 0; i < board.getWidth() - 3; i++) {
-    for (let j = 0; j < board.getHeight(); j++) {
+  for (let i = 0; i < board.getHeight() - 3; i++) {
+    for (let j = 0; j < board.getWidth(); j++) {
       if (boardMatrix[i][j].selectedBy === player && boardMatrix[i + 1][j].selectedBy === player && boardMatrix[i + 2][j].selectedBy === player && boardMatrix[i + 3][j].selectedBy === player) {
         return true;
       }
     }
   }
   // ascendingDiagonalCheck 
-  for (let i = 3; i < board.getWidth(); i++) {
-    for (let j = 0; j < board.getHeight() - 3; j++) {
+  for (let i = 3; i < board.getHeight(); i++) {
+    for (let j = 0; j < board.getWidth() - 3; j++) {
       if (boardMatrix[i][j].selectedBy === player && boardMatrix[i - 1][j + 1].selectedBy === player && boardMatrix[i - 2][j + 2].selectedBy === player && boardMatrix[i - 3][j + 3].selectedBy === player)
         return true;
     }
   }
   // descendingDiagonalCheck
-  for (let i = 3; i < board.getWidth(); i++) {
-    for (let j = 3; j < board.getHeight(); j++) {
+  for (let i = 3; i < board.getHeight(); i++) {
+    for (let j = 3; j < board.getWidth(); j++) {
       if (boardMatrix[i][j].selectedBy === player && boardMatrix[i - 1][j - 1].selectedBy === player && boardMatrix[i - 2][j - 2].selectedBy === player && boardMatrix[i - 3][j - 3].selectedBy === player)
         return true;
     }
@@ -139,19 +168,20 @@ function drawGrid(board) {
             },
             on: {
               click: () => {
-                console.log('el clicked');
-                if (!!cell.selectedBy) return;
-                console.log('selecting el');
-                cell.selectCell(board.currentPlayer);
+                if (board.isGameOver) return;
+                const targetCell = board.getSelectedCell(cell);
+                if (!!targetCell.selectedBy) return;
+                targetCell.selectCell(board.currentPlayer);
                 const hasPlayerWon = areFourConnected(board.currentPlayer, board);
-                patch(gameStatusNode, h('div', `Won by ${hasPlayerWon ? board.currentPlayer : 'None'}`))
                 board.switchCurrentPlayer();
+                hasPlayerWon && board.gameOver();
+                patch(gameStatusNode, h('div', `Won by ${hasPlayerWon ? board.currentPlayer : 'None'}`))
                 redrawBoard(board);
 
               },
             },
           },
-          `el-${i}#${j}`,
+          `${i}-${j}`,
         ),
       );
     }
