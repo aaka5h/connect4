@@ -15,6 +15,12 @@ $breakpoints: (
     @content;
   }
 }
+@mixin only-hover {
+
+  @media (hover: hover) and (pointer: fine) {
+    @content
+  }
+}
 // --- end media queries
 
 *,
@@ -103,9 +109,12 @@ main {
     border-radius: 100%;
   }
 
-  &:hover {
-    background: color.change(gray, $alpha: 0.9);
+  @include only-hover {
+    &:hover {
+      background: color.change(gray, $alpha: 0.9);
+    }
   }
+
 
   @include device-greater-than(md) {
     margin: 0.25rem;
@@ -124,7 +133,7 @@ main {
     z-index: 1;
     animation-duration: 1s;
     box-shadow:
-      inset 3px 3px 6px var(--shadow-color),
+      //inset 3px 3px 6px var(--shadow-color),
       inset -3px -3px 6px 1px rgba(255, 255, 255, 0.2);
   }
 }
