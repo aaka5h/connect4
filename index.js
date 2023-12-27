@@ -174,10 +174,14 @@ function drawGrid(board) {
         h(
           "div.grid-el",
           {
+            style: {},
+            hook: {
+              insert: (node) => {},
+            },
             class: {
               "cell-selected": !!cell.selectedBy,
-              red: cell.selectedBy === "red",
-              yellow: cell.selectedBy === "yellow",
+              // red: cell.selectedBy === "red",
+              // yellow: cell.selectedBy === "yellow",
             },
             on: {
               click: () => {
@@ -202,7 +206,17 @@ function drawGrid(board) {
               },
             },
           },
-          h("div.grid-el_inset"),
+          [
+            h("div.grid-el__shadow"),
+            cell.selectedBy &&
+              h("div.grid-el__inset", {
+                class: {
+                  bounce: true,
+                  red: cell.selectedBy === "red",
+                  yellow: cell.selectedBy === "yellow",
+                },
+              }),
+          ],
         ),
       );
     }
@@ -217,16 +231,5 @@ function drawGrid(board) {
   const matrix = generateMatrix(rowSize, colSize);
   vnode = drawGrid(matrix);
   gameStatusNode = h("div", "Won by: None");
-  patch(
-    container,
-    h(
-      "main",
-      {
-        style: {
-          fontFamily: "sans",
-        },
-      },
-      [h("h1", "Connect 4"), vnode, gameStatusNode],
-    ),
-  );
+  patch(container, h("main", [h("h1", "Connect 4"), vnode, gameStatusNode]));
 })();
