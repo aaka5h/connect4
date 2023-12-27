@@ -64,10 +64,10 @@ body {
 }
 
 .grid-el {
-  margin: 0.25rem;
+  margin:.5rem 0.25rem;
   text-align: center;
-  width: 3.75rem;
-  height: 3.75rem;
+  width: 3rem;
+  height: 3rem;
   border-radius: 100%;
   position: relative;
 
@@ -91,6 +91,7 @@ body {
   }
 
   @include device-greater-than(md) {
+    margin:.25rem;
     width: 6rem;
     height: 6rem;
   }
