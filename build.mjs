@@ -1,15 +1,23 @@
 #!/usr/bin/env node
+import yargs from "yargs/yargs";
+import { hideBin } from "yargs/helpers";
+
+const argv = yargs(hideBin(process.argv)).argv;
 
 import { sassPlugin } from "esbuild-sass-plugin";
 import * as esbuild from "esbuild";
 
 const ctx = await esbuild.context({
-  //   index.js --bundle --outfile=build/index.js
   entryPoints: ["index.js"],
   outdir: "build",
-  //    outfile: 'index.js',
   bundle: true,
   plugins: [sassPlugin()],
 });
 
-await ctx.watch();
+if (argv.watch) {
+  console.log('watching build...');
+  await ctx.watch();
+} else {
+  await ctx.rebuild();
+  await ctx.dispose();
+}

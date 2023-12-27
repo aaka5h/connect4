@@ -8,7 +8,8 @@
     "watch:build": "npm run build -- --watch",
     "format": "prettier . --write",
     "test": "test",
-    "start": "serve ."
+    "start": "serve .",
+    "dev": "concurrently --kill-others \"npm run watch:build\" \"npm run start\""
   },
   "keywords": [
     "connect-4",
@@ -17,9 +18,11 @@
   "author": "aaka5h",
   "license": "ISC",
   "dependencies": {
-    "snabbdom": "^3.5.1"
+    "snabbdom": "^3.5.1",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
+    "concurrently": "^8.2.2",
     "esbuild": "0.19.9",
     "esbuild-sass-plugin": "^2.16.1",
     "prettier": "3.1.1",
