@@ -7,7 +7,7 @@ import {
   h,
 } from "snabbdom";
 
-import "./src/styles/style.scss";
+import "./styles/style.scss";
 
 let vnode;
 let gameStatusNode;
