@@ -90,7 +90,11 @@ class Board {
   };
 
   selectCell(player, [i, j]) {
-    this.memento.set([...this.matrix]);
+    this.memento.set({
+      matrix: [...this.matrix],
+      currentPlayer: this.currentPlayer,
+      isGameOver: this.isGameOver,
+    });
     this.setCell(i, j, new Cell({ index: `${i}-${j}`, selectedBy: player }));
   }
 
@@ -103,7 +107,12 @@ class Board {
     return this.memento.undoable();
   }
   undo() {
-    if (this.memento.undoable()) this.matrix = this.memento.undo();
+    if (this.memento.undoable()) {
+      const { matrix, currentPlayer, isGameOver } = this.memento.undo();
+      this.matrix = matrix;
+      this.currentPlayer = currentPlayer;
+      this.isGameOver = isGameOver;
+    }
   }
   getCell(row, col) {
     if (row < 0 || col < 0) throw new Error("invalid index");

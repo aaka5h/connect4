@@ -16,9 +16,8 @@ $breakpoints: (
   }
 }
 @mixin only-hover {
-
   @media (hover: hover) and (pointer: fine) {
-    @content
+    @content;
   }
 }
 // --- end media queries
@@ -114,7 +113,6 @@ main {
       background: color.change(gray, $alpha: 0.9);
     }
   }
-
 
   @include device-greater-than(md) {
     margin: 0.25rem;
