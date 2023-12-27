@@ -5,18 +5,21 @@ import {
   styleModule,
   eventListenersModule,
   h,
+  attributesModule,
 } from "snabbdom";
 
 import "./styles/style.scss";
 
 let vnode;
 let gameStatusNode;
+let undoBtn;
 
 const patch = init([
   classModule,
   propsModule,
   styleModule,
   eventListenersModule,
+  attributesModule,
 ]);
 const rowSize = 6;
 const colSize = 7;
@@ -34,6 +37,27 @@ function createMatrix(row, col) {
   return matrix;
 }
 
+class BoardMemento {
+  state = [];
+  set(el) {
+    this.state.push(el);
+  }
+  clear() {
+    this.state = [];
+  }
+
+  undoable() {
+    console.log(this.state);
+    return !!this.state.length;
+  }
+  getState() {
+    return this.state.at(-1);
+  }
+  undo() {
+    return this.state.pop();
+  }
+}
+
 class Board {
   currentPlayer = "red";
   matrix = [];
@@ -42,6 +66,7 @@ class Board {
     this.currentPlayer = initPlayer;
     this.matrix = createMatrix(row, col);
     this.isGameOver = false;
+    this.memento = new BoardMemento();
   }
 
   gameOver() {
@@ -64,6 +89,22 @@ class Board {
     }
   };
 
+  selectCell(player, [i, j]) {
+    this.memento.set([...this.matrix]);
+    this.setCell(i, j, new Cell({ index: `${i}-${j}`, selectedBy: player }));
+  }
+
+  setCell(i, j, cell) {
+    const clonedRow = [...this.matrix[i]];
+    clonedRow[j] = cell;
+    this.matrix[i] = clonedRow;
+  }
+  undoable() {
+    return this.memento.undoable();
+  }
+  undo() {
+    if (this.memento.undoable()) this.matrix = this.memento.undo();
+  }
   getCell(row, col) {
     if (row < 0 || col < 0) throw new Error("invalid index");
     if (row > this.getHeight() - 1 || col > this.getWidth() - 1)
@@ -93,9 +134,6 @@ class Cell {
 
   get coordinates() {
     return this.index.split("-");
-  }
-  selectCell(currentPlayer) {
-    this.selectedBy = currentPlayer;
   }
 }
 
@@ -160,6 +198,7 @@ function generateMatrix(row, col) {
 
 const redrawBoard = (board) => {
   vnode = patch(vnode, drawGrid(board));
+  redrawUndo(board);
 };
 
 function drawGrid(board) {
@@ -188,7 +227,10 @@ function drawGrid(board) {
                 if (board.isGameOver) return;
                 const targetCell = board.getSelectedCell(cell);
                 if (!!targetCell.selectedBy) return;
-                targetCell.selectCell(board.currentPlayer);
+                board.selectCell(
+                  board.currentPlayer,
+                  targetCell.index.split("-"),
+                );
                 const hasPlayerWon = areFourConnected(
                   board.currentPlayer,
                   board,
@@ -226,10 +268,39 @@ function drawGrid(board) {
   return h("div", { props: { className: "grid-container" } }, renderedMatrix);
 }
 
+const drawUndo = (board) =>
+  h(
+    "button.btn",
+    {
+      attrs: {
+        disabled: !board.undoable(),
+      },
+      on: {
+        click: () => {
+          board.undo();
+          redrawBoard(board);
+        },
+      },
+    },
+    "Undo",
+  );
+// TODO: centralise all rendering and follow common pattern
+const redrawUndo = (board) => {
+  undoBtn = patch(undoBtn, drawUndo(board));
+};
+
 (() => {
   const container = document.getElementById("container");
-  const matrix = generateMatrix(rowSize, colSize);
-  vnode = drawGrid(matrix);
+  const board = generateMatrix(rowSize, colSize);
+  vnode = drawGrid(board);
+  undoBtn = drawUndo(board);
   gameStatusNode = h("div", "Won by: None");
-  patch(container, h("main", [h("h1", "Connect 4"), vnode, gameStatusNode]));
+  patch(
+    container,
+    h("main", [
+      h("h1.title", "Connect 4"),
+      vnode,
+      h("div.meta-info", [gameStatusNode, undoBtn]),
+    ]),
+  );
 })();

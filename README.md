@@ -6,3 +6,4 @@ This is a simple
 
 1. Understand Simple Virtual DOM
 2. understanding undo pattern via immutable structures
+   used Memento Pattern
